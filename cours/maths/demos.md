@@ -37,5 +37,3 @@ u_n u_{n+2} &= \dfrac{u_{n+1}}{q} \times qu_{n+1}\\
 &= u_{n+1}^2
 \end{align}
 $$
-
-$\lVert a+b\rVert$
