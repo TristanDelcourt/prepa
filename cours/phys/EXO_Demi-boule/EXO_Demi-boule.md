@@ -42,7 +42,7 @@ sin(i_{lim}) &= \dfrac{y_{lim}}{R}\\
    \begin{align}
 nsin(i) &= sin(r)\\
 \iff r &= arcsin(nsin(i))\\
-\iff r &= \boxed{arcsin(1.5sin(i))}
+     r &= \boxed{arcsin(1.5sin(i))}
 \end{align}
    $$
    
@@ -74,13 +74,13 @@ y_I^2 + x_I^2 &= 5^2\\
    
    ![a](deltas.png)
    
-   D'après ce schéma, nous avons donc:
+   D'après ce schéma (où $\alpha_1 = \alpha_2 = D$), nous avons donc:
    
    $$
    \begin{align}
-tan(\alpha) &= \dfrac{\Delta y}{\Delta x}\\
-tan(r-i)    &= \dfrac{\Delta y}{\Delta x}\\
-         &= \boxed{m}
+tan(D) &= -\dfrac{\Delta y}{\Delta x}\\
+tan(r-i)    &= -\dfrac{\Delta y}{\Delta x}\\
+         &= \boxed{-m}
 \end{align}
    $$
    
@@ -90,8 +90,67 @@ tan(r-i)    &= \dfrac{\Delta y}{\Delta x}\\
    \begin{align}
 y_I &= mx_I + p\\
 \iff p &= y_I - mx_I\\
-\iff p &= \boxed{y_I - tan(r-i)x_I}
+\iff p &= \boxed{y_I + tan(r-i)x_I}
 \end{align}
    $$
    
-   On a donc: $\boxed{y = tan(r-i)x + (y_I - tan(r-i)x_I)}$
+   On a donc: $y = -tan(r-i)x + (y_I + tan(r-i)x_I)\\ \iff y = \boxed{tan(r-i)(x-x_I) + y_I}$
+
+8. On peut modéliser des rayons grâce à python avec le programme suivant:
+   
+   ```python
+   # Importation des bibliothèques utiles
+   import numpy as np
+   import matplotlib.pyplot as plt
+   
+   # Les constantes du problème
+   n = 1.5 # C'est l'indice du milieu de la lentille
+   R = 5 # C'est le rayon en cm de la lentille
+   
+   def angleInc ( yI ) :
+       return -np.arcsin ( yI / R )
+   
+   # Définition de l'angle de réfraction angleRef (noté r dans l'étude théorique) en fonction de yI
+   ylim = R/n
+   def angleRef ( yI ) :
+       if abs ( yI ) > ylim:
+           return None
+       else:
+           return np.arcsin ( n*np.sin ( angleInc ( yI ) ) )
+   
+   # Définition de l'angle de déviation D
+   def angleD ( yI ) :
+       if abs ( yI ) > ylim:
+           return None
+       else:
+           return angleRef ( yI ) - angleInc ( yI )
+   
+   # Abscisse du point I
+   def xI (yI) :
+       return np.sqrt ( R**2 - yI**2 )
+   
+   # Partie graphique proprement dite
+   plt.plot ( [0,0] , [-R, R] , 'k-') # on trace le dioptre d'entrée
+   
+   # On trace un trait qui va du point (0, -R) au point (0, R).
+   yS = np.linspace (-R, R, 500)
+   
+   plt.plot ( xI(yS) , yS , 'k-') # on trace le dioptre de sortie
+   for yI in [k*R/10 for k in range(-10, 11)]:
+       plt.plot ( [-1, xI(yI)] , [yI, yI] , 'b-') #On trace les rayons à gauche du dioptre sphérique.
+       if abs (yI) < ylim:
+           y2 = yI + np.tan (angleD (yI) ) * (20 - xI (yI) ) #On trace les rayons à droite du dioptre sphérique.
+           plt.plot ([xI(yI), 20], [yI, y2], 'b-')
+   
+   plt.xlabel ("x (cm)")
+   plt.ylabel ("y (cm)")
+   plt.title ("Tracé des rayons lumineux pour une lentille demi-boule")
+   plt.axis ('scaled') #pour avoir la même échelle sur les deux axes
+   plt.show ()
+   ```
+
+9. Cela nous donne le graphique suivant:
+   
+   ![a](rayons.png)
+
+10. On peut voir que plus les rayons sont écartés de l'axe optique, les rayons ne convergent pas en un point, le système n'est donc <u>pas stigmatique</u>. Alors que si les rayons sont tous relativement proches de l'axe optique, les rayons sortant convergent en un point. On est donc dans une situation de <u>stigmatisme approché</u>.

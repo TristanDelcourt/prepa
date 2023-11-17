@@ -345,7 +345,7 @@ int factorielle(int n){
 ```c
 int main(){
     while(1){
-    
+
     }
     return 0;
 }
@@ -552,3 +552,65 @@ P: $r=(i-1)!$ est un IdB.
   $r' = ri$, $i' = i+1$
   
   $r'=ri=(i-1)!$
+
+## Tests de programmes
+
+Tester un programme s'est s'assurer en pratique de son bon comportement.
+
+<u>Définition:</u> Effectuer un <u>test unitaire</u> sur un programme/ une fonction, c'est lancer sur une entrée pour laquelle on connait la sortie. En pratique, on utilise des assertions.
+
+```c
+bool est_premier(int a){
+    ...
+}
+int main(){
+    assert(est_premier(2));
+    assert(est_premier(3));
+    assert(est_premier(4999);
+    assert(!est_premier(4);
+    return 0;
+}
+```
+
+### Graphe de flot de contrôle
+
+<u>Définition:</u> Le graphe de flot de contrôle d'un programme/algorithme/une fonction est constitué:
+
+- de blocs d'instructions
+
+- de tests de conditions
+
+- des flèches qui relient les blocs et les conditions entre eux en respectant l'ordre d'exécution du programme.
+
+<u>Exemple:</u> Exponentiation rapide
+
+```
+Entrée; x rel, n entier
+Sortie: x^n
+
+
+r <- 1
+X <- x
+Tant que n>0:
+    si n%2==1
+        r <- r*X
+    n = floor(n/2)
+    X <- X*X
+renvoyer r
+```
+
+```mermaid
+flowchart TB;
+    id1(r <- 1 \n N <- n \n X <- x) --> id2([n>0])
+    id2 -->|oui| id3([N%2==1])
+    id2 -->|non| id4(return r)
+    id3 -->|oui| id5(r <- X * r)
+    id3 -->|non| id6(N <- N//2 \n X <- X ** 2)
+    id6 --> id2
+```
+
+<u>Définition:</u> Une batterie de tests couvre un CFG par sommets si chaque condition et chaque bloc de code est vérifié. Une batterie de tests couvre un CFG par arrêtes si chaque flèche est utilisé.
+
+```
+
+```

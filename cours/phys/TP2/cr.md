@@ -165,10 +165,10 @@ nsin(42)&=sin(90)\\
    $$
    \begin{align}
 tan(i') &= \dfrac{L}{H-(h-h')}\\
-  &= \dfrac{25}{48-(8.7-3)}\\
-  &= \dfrac{250}{423}\\
+&= \dfrac{25}{48-(8.7-3)}\\
+&= \dfrac{250}{423}\\
 \iff i'&=arctan(\dfrac{250}{423})\\
- &= \fbox{30.6°}
+&= \fbox{30.6°}
 \end{align}
    $$
    
@@ -187,9 +187,9 @@ l &= tan(i')h'\\
    $$
    \begin{align}
 tan(i) &= \dfrac{l}{h}\\
- &= \dfrac{3.55}{8.7}\\
+&= \dfrac{3.55}{8.7}\\
 \iff i &= arctan(\dfrac{3.55}{8.7})
- &= \fbox{22.2°}
+&= \fbox{22.2°}
 \end{align}
    $$
    
@@ -199,8 +199,8 @@ tan(i) &= \dfrac{l}{h}\\
    \begin{align}
 sin(i') &= nsin(i)\\
 \iff n  &= \dfrac{sin(i')}{sin(i)}\\
-  &= \dfrac{sin(30.6)}{sin(22.2)}\\
-  &= \fbox{1.35}
+&= \dfrac{sin(30.6)}{sin(22.2)}\\
+&= \fbox{1.35}
 \end{align}
    $$
 
