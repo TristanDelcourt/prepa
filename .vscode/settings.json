@@ -2,5 +2,8 @@
     "ocaml.sandbox": {
         "kind": "global"
     },
-    "todo-tree.tree.showCountsInTree": true
+    "todo-tree.tree.showCountsInTree": true,
+    "files.associations": {
+        "main.C": "cpp"
+    }
 }
