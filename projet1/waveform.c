@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "sound.h"
 
-# define PI 3.14159265358979323846
+#define PI 3.14159265358979323846
 
 sound_t* white(float duree, int f_ech){
     sound_t* s = malloc(sizeof(sound_t));
@@ -21,24 +21,40 @@ sound_t* white(float duree, int f_ech){
 
 sound_t* sine(float freq, int amplitude, float duree, int f_ech){
     sound_t* s = malloc(sizeof(sound_t));
+    unsigned int number_of_samples = duree*f_ech;
 
-    s->n_samples = floor(duree*f_ech);
-    s->samples = malloc((s->n_samples) * sizeof(int16_t));
-    double delta_t = (float)1/f_ech;
+    s->n_samples = number_of_samples;
+    int16_t* tab = malloc(number_of_samples * sizeof(int16_t));
+
+    double delta_t = (double)1/f_ech;
     double omega = 2*PI*freq*delta_t;
-    printf("%f, %f, %d", delta_t, omega, s->n_samples);
-    for(int i = 0; i<(s->n_samples); i++){
-        double value = sin(omega*i);
+    printf("%lf, %lf, %d", omega, delta_t, number_of_samples);
+
+    double value;
+    float boosted;
+    int16_t rounded;
+
+    for(int i = 0; i<number_of_samples; i++){
+        value = sin(omega*i);
         //printf("%f | ", value);
         
-        float thing = round(value*amplitude);
-        //printf("%f | ", thing);
+        boosted = value*amplitude;
+        //printf("%f | ", boosted);
 
-        int16_t thing2 = thing;
-        //printf("%d\n", thing2);
+        rounded = boosted;
+        //printf("%d\n", rounded);
 
+        // Visualisateur de courbe dans la console
+        /*
+        for(int j=0; j<value*50+50; j++){
+            printf("#");
+        }
+        printf("\n");
+        */
 
-        (s->samples)[i] = thing2;
+        tab[i] = rounded;
     }
+
+    s->samples = tab;
     return s;
 }

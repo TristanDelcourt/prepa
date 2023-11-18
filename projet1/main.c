@@ -9,7 +9,7 @@ int main(){
 
     char filename[] = "test2.wav";
 
-    /*
+    /* Q8
     sound_t* s = malloc(sizeof(sound_t));
     s->n_samples = 3;
 
@@ -19,9 +19,17 @@ int main(){
     (s->samples)[2] = -6337;
     */
 
-    sound_t* s = sine(4, 16000, 1, 44100); 
-    save_sound(filename, s);
+    /* Test write_int
+    FILE* f = fopen("godhelpme.wav", "w");
+    for(int i = 0; i<65535; i++){
+        write_int(f, i-32768, 2);
+    }
+    fclose(f);
+    */
 
-    free_sound(s);
+    sound_t* s = sine(440, 16000, 1, 44100); 
+    save_sound(filename, s);
+    
+    //free_sound(s);
     return 0;
 }

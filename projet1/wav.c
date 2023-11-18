@@ -65,9 +65,11 @@ void save_sound(char* filename, sound_t* s){
     FILE* f = fopen(filename, "w");
     assert(f!=NULL);
 
-    write_header(f, s->n_samples);
+    unsigned int number_of_samples = s->n_samples;
 
-    for(int i = 0; i<s->n_samples; i++){
+    write_header(f, number_of_samples);
+
+    for(int i = 0; i<number_of_samples; i++){
         write_int(f, (s->samples)[i], 2);
     }
     fclose(f);
