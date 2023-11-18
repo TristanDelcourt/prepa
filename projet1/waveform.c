@@ -24,8 +24,8 @@ sound_t* sine(float freq, int amplitude, float duree, int f_ech){
 
     s->n_samples = floor(duree*f_ech);
     s->samples = malloc((s->n_samples) * sizeof(int16_t));
-    float delta_t = (float)1/f_ech;
-    float omega = 2*PI*freq*delta_t;
+    double delta_t = (float)1/f_ech;
+    double omega = 2*PI*freq*delta_t;
     printf("%f, %f, %d", delta_t, omega, s->n_samples);
     for(int i = 0; i<(s->n_samples); i++){
         double value = sin(omega*i);
@@ -35,7 +35,7 @@ sound_t* sine(float freq, int amplitude, float duree, int f_ech){
         //printf("%f | ", thing);
 
         int16_t thing2 = thing;
-        printf("%d\n", thing2);
+        //printf("%d\n", thing2);
 
 
         (s->samples)[i] = thing2;
