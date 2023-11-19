@@ -13,7 +13,7 @@ sound_t* white(float duree, int f_ech){
     s->n_samples = floor(duree*f_ech);
     s->samples = malloc((s->n_samples) * sizeof(uint16_t));
     for(int i = 0; i<(s->n_samples); i++){
-        (s->samples)[i] = rand()%65536;
+        (s->samples)[i] = rand()%65536-32767;
     }
     return s;
 
