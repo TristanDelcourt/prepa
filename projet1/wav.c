@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <assert.h>
+#include <stdint.h>
 #include "sound.h"
 
 void write_int(FILE* f, int a, int size){
     assert(size>=1 && size<=4);
 
     for(int i = 0; i<size; i++){
-        // printf("%c", (a >> (i * 8)) & 0xFF);
-        fprintf(f, "%c", (a >> ((i * 8)) & 0xFF));
+        fprintf(f, "%c", (a >> ((i * 8)) % 256));
     }
 }
 
@@ -64,7 +64,6 @@ void write_header(FILE* f, int n){
 
 void save_sound(char* filename, sound_t* s){
     FILE* f = fopen(filename, "w");
-    // FILE *f = stdout;
     assert(f!=NULL);
 
     unsigned int number_of_samples = s->n_samples;
@@ -74,6 +73,8 @@ void save_sound(char* filename, sound_t* s){
     for(int i = 0; i<number_of_samples; i++){
         write_int(f, (s->samples)[i], 2);
     }
+
+    printf("Fichier '%s' généré.\nTaille du fichier: %f Mo\nDurée de l'audio %d s\n", filename, (float)(s->n_samples)*2/1000000, (s->n_samples)*1/44100);
     free_sound(s);
     fclose(f);
 }
