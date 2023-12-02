@@ -100,7 +100,7 @@ int main(int argc, char** argv){
     mix_t* m = load_mix(argv[1]);
     sound_t* s = reduce_mix(m);
     save_sound(argv[2], s);
-    
+
 
     return 0;
 }
