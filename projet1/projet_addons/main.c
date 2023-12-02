@@ -13,10 +13,10 @@ int main(int argc, char** argv){
     sound_t* s = read_wav("test2.wav");
 
     /*
-    int stereo_flag;
-    mix_t** m_lr = load_mix("test2.txt", &stereo_flag);
-    sound_t** s = reduce_mix(m_lr, stereo_flag);
-    save_sound("test2.wav", s, stereo_flag);
+    int number_of_channels;
+    mix_t** m_lr = load_mix("test.txt", &number_of_channels);
+    sound_t** s = reduce_mix(m_lr, number_of_channels);
+    save_sound("test2.wav", s, number_of_channels);
     */
 
     return 0;

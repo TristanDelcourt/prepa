@@ -40,17 +40,17 @@ track_t* read_track(FILE* f){
     return t;
 }
 
-mix_t** load_mix(char* filename, int* stereo_flag){
+mix_t** load_mix(char* filename, int* number_of_channels){
     FILE* f = fopen(filename, "r");
     assert(f!=NULL);
 
-    fscanf(f, "%d", stereo_flag);
+    fscanf(f, "%d", number_of_channels);
 
-    mix_t** mix_left_right = malloc( (*stereo_flag + 1) * sizeof(mix_t*));
-    for(int j = 0; j< *stereo_flag+1 ; j++)
+    mix_t** mix_left_right = malloc( (*number_of_channels) * sizeof(mix_t*));
+    for(int j = 0; j< *number_of_channels+1 ; j++)
         mix_left_right[j] = malloc(sizeof(mix_t));
 
-    for(int j = 0; j< *stereo_flag+1 ; j++){
+    for(int j = 0; j< *number_of_channels ; j++){
         
         int nb_tracks;
         fscanf(f, "%d", &nb_tracks);
@@ -69,7 +69,6 @@ mix_t** load_mix(char* filename, int* stereo_flag){
         (mix_left_right[j])->vols = vol;
 
     }
-
     fclose(f);
     return mix_left_right;
 }

@@ -47,12 +47,12 @@ sound_t* reduce_track(track_t* t){
     return out;
 }
 
-sound_t** reduce_mix(mix_t** m, int stereo_flag){
-    sound_t** out = malloc((stereo_flag + 1) * sizeof(sound_t*));
-    for(int i = 0; i < stereo_flag+1 ; i++)
+sound_t** reduce_mix(mix_t** m, int number_of_channels){
+    sound_t** out = malloc((number_of_channels) * sizeof(sound_t*));
+    for(int i = 0; i < number_of_channels ; i++)
         out[i] = malloc(sizeof(sound_t));
 
-    for(int stereo = 0; stereo < stereo_flag+1 ; stereo++){
+    for(int stereo = 0; stereo < number_of_channels ; stereo++){
         
 
         int len_tab = m[stereo]->n_tracks;

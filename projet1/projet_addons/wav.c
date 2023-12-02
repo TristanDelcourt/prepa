@@ -12,7 +12,7 @@ void write_int(FILE* f, int a, int size){
     }
 }
 
-void write_header(FILE* f, int n, int stereo_flag){
+void write_header(FILE* f, int n, int number_of_channels){
 
     // "RIFF"
     fprintf(f, "%c", 'R');
@@ -20,8 +20,8 @@ void write_header(FILE* f, int n, int stereo_flag){
     fprintf(f, "%c", 'F');
     fprintf(f, "%c", 'F');
     
-    // 36+L*n/8 = 36 + 2*n*(stereo_flag + 1)
-    write_int(f, 36 + 2*n*(stereo_flag + 1), 4);
+    // 36+L*n/8 = 36 + 2*n*(number_of_channels)
+    write_int(f, 36 + 2*n*(number_of_channels), 4);
 
     // "WAVEfmt "
     fprintf(f, "%c", 'W');
@@ -39,17 +39,17 @@ void write_header(FILE* f, int n, int stereo_flag){
     // 1
     write_int(f, 1, 2);
     
-    // stereo_flag + 1
-    write_int(f, stereo_flag + 1, 2);
+    // number_of_channels
+    write_int(f, number_of_channels, 2);
 
     // f = 44100
     write_int(f, 44100, 4);
 
-    // f*(stereo_flag+1)*L/8 = 88200 * (stereoflag + 1)
-    write_int(f, 88200 * (stereo_flag + 1), 4);
+    // f*(number_of_channels)*L/8 = 88200 * (number_of_channels)
+    write_int(f, 88200 * (number_of_channels), 4);
 
-    // (stereo_flag+1)*L/8 = 2 * (stereo_flag + 1)
-    write_int(f, 2 * (stereo_flag + 1), 2);
+    // (number_of_channels)*L/8 = 2 * (number_of_channels)
+    write_int(f, 2 * (number_of_channels), 2);
 
     // L = 16
     write_int(f, 16, 2);
@@ -60,28 +60,28 @@ void write_header(FILE* f, int n, int stereo_flag){
     fprintf(f, "%c", 't');
     fprintf(f, "%c", 'a');
 
-    // L*(stereo_flag + 1)*n/8 = 2*n
-    write_int(f, (stereo_flag + 1)*2*n, 4);
+    // L*(number_of_channels)*n/8 = 2*n
+    write_int(f, (number_of_channels)*2*n, 4);
 }
 
-void save_sound(char* filename, sound_t** s, int stereo_flag){
+void save_sound(char* filename, sound_t** s, int number_of_channels){
     FILE* f = fopen(filename, "w");
     assert(f!=NULL);
 
 
     unsigned int number_of_samples = 0;
-    for(int j = 0; j < stereo_flag+1; j++)
+    for(int j = 0; j < number_of_channels; j++)
         if(s[j] -> n_samples > number_of_samples){
             number_of_samples = s[j] -> n_samples;
         }
 
 
-    write_header(f, number_of_samples, stereo_flag);
+    write_header(f, number_of_samples, number_of_channels);
 
     printf("%d\n", number_of_samples);
 
     for(int i = 0; i<number_of_samples; i++){
-        for(int j = 0; j < stereo_flag+1; j++){
+        for(int j = 0; j < number_of_channels; j++){
             if(i < s[j]->n_samples)
                 write_int(f, (s[j]->samples)[i], 2);
             else
@@ -89,7 +89,9 @@ void save_sound(char* filename, sound_t** s, int stereo_flag){
         }
     }
 
-    printf("Fichier '%s' généré.\nTaille du fichier: %f Mo\nDurée de l'audio %d s\n", filename, (float)(stereo_flag +1)*(number_of_samples)*2/1000000, (number_of_samples)*1/44100);
+    printf("Fichier '%s' généré.\nTaille du fichier: %f Mo\nDurée de l'audio %d s\n", filename, (float)(number_of_channels)*(number_of_samples)*2/1000000, (number_of_samples)*1/44100);
+    for(int j = 0; j < number_of_channels; j++)
+        free_sound(s[j]);
     fclose(f);
 }
 
@@ -102,7 +104,7 @@ void read_int(FILE* f, int16_t* a, int size){
     }
 }
 
-void read_header(FILE* f, int* N, int* f_ech, int* L, int* stereo_flag){
+void read_header(FILE* f, int* N, int* f_ech, int* L, int* number_of_channels){
     char* useless;
     char buffer;
 
@@ -112,7 +114,7 @@ void read_header(FILE* f, int* N, int* f_ech, int* L, int* stereo_flag){
     fscanf(f, "%c", useless);
     fscanf(f, "%c", useless);
 
-    // 36+L*n/8 = 36 + 2*n*(stereo_flag + 1)
+    // 36+L*n/8 = 36 + 2*n*(number_of_channels)
     fscanf(f, "%c", useless);
     fscanf(f, "%c", useless);
     fscanf(f, "%c", useless);
@@ -138,12 +140,11 @@ void read_header(FILE* f, int* N, int* f_ech, int* L, int* stereo_flag){
     fscanf(f, "%c", useless);
     fscanf(f, "%c", useless);
     
-    // stereo_flag + 1
-    int stereo_flag_1;
+    // number_of_channels
     fscanf(f, "%c", &buffer);
-    stereo_flag_1 = buffer;
+    *number_of_channels = buffer;
     fscanf(f, "%c", &buffer);
-    stereo_flag_1 += buffer << 8;
+    *number_of_channels += buffer << 8;
 
     // f = 44100
     fscanf(f, "%c", &buffer);
@@ -155,13 +156,13 @@ void read_header(FILE* f, int* N, int* f_ech, int* L, int* stereo_flag){
     fscanf(f, "%c", &buffer);
     *f_ech += buffer << 24;
 
-    // f*(stereo_flag+1)*L/8 = 88200 * (stereoflag + 1)
+    // f*(number_of_channels)*L/8 = 88200 * (stereoflag + 1)
     fscanf(f, "%c", useless);
     fscanf(f, "%c", useless);
     fscanf(f, "%c", useless);
     fscanf(f, "%c", useless);;
 
-    // (stereo_flag+1)*L/8 = 2 * (stereo_flag + 1)
+    // (number_of_channels)*L/8 = 2 * (number_of_channels)
     fscanf(f, "%c", useless);
     fscanf(f, "%c", useless);
 
@@ -177,7 +178,7 @@ void read_header(FILE* f, int* N, int* f_ech, int* L, int* stereo_flag){
     fscanf(f, "%c", useless);
     fscanf(f, "%c", useless);
 
-    // L*(stereo_flag + 1)*n/8 = 2*n
+    // L*(number_of_channels)*n/8 = 2*n*(number_of_channels)
     int32_t val4;
     fscanf(f, "%c", &buffer);
     val4 = buffer;  
@@ -185,11 +186,10 @@ void read_header(FILE* f, int* N, int* f_ech, int* L, int* stereo_flag){
     val4 += buffer << 8;
     fscanf(f, "%c", &buffer);
     val4 += buffer << 16;
-    fscanf(f, "%c", &buffer);    
+    fscanf(f, "%c", &buffer);
     val4 += buffer << 24;
 
     *N = val4/2;
-    *stereo_flag = stereo_flag_1 - 1;
 
     assert(*L==16);
     assert(*f_ech == 44100);
