@@ -1,0 +1,60 @@
+IN note.mid
+//////////////////////////////
+
+4d 54 68 64
+MThd
+
+00 00 00 06
+6 bytes of header data
+
+00 01
+single track
+
+00 02
+two tracks
+
+01 e0
+480 ticks per quarter note
+
+4d 54 72 6b
+MTrk
+
+00 00 00 17
+23 bytes of track data
+
+00 ff 03 00
+track name
+
+00 ff 58 04 04 02 18 08
+set time signature to 4/4
+
+00 ff 51 03 03 07 a1 20
+set tempo to 120 bpm
+
+00 ff 2f 00
+end of track
+
+//////////////////////////////
+
+4d 54 72 6b
+MTrk
+
+00 00 00 54
+84 bytes of track data
+
+00 b0 79 00
+reset all controllers
+
+00 ff 03 00
+track name
+
+00 b0 0a 40
+pan left
+
+00 b0 07 64
+volume
+
+00 b0 0b 7f
+expression
+
+00 b0 
