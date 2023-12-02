@@ -17,7 +17,7 @@ int main(int argc, char** argv){
     save_sound("test.wav", s, number_of_channels);
     */
 
-   /* Read wav file
+    /* Read wav file
     int number_of_channels;
     sound_t** s = read_wav("test2.wav", &number_of_channels);
     save_sound("plswork.wav", s, number_of_channels);
