@@ -9,14 +9,18 @@
 int main(int argc, char** argv){
     //assert(argc==3);
     srand(time(NULL));
-
-    sound_t* s = read_wav("test2.wav");
-
-    /*
+    
+    /* stereo
     int number_of_channels;
     mix_t** m_lr = load_mix("test.txt", &number_of_channels);
     sound_t** s = reduce_mix(m_lr, number_of_channels);
-    save_sound("test2.wav", s, number_of_channels);
+    save_sound("test.wav", s, number_of_channels);
+    */
+
+   /* Read wav file
+    int number_of_channels;
+    sound_t** s = read_wav("test2.wav", &number_of_channels);
+    save_sound("plswork.wav", s, number_of_channels);
     */
 
     return 0;

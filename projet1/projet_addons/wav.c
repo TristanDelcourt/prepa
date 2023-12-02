@@ -99,46 +99,45 @@ void read_int(FILE* f, int16_t* a, int size){
     char buffer;
     for(int i = 0; i<size; i++){
         fscanf(f, "%c", &buffer);
-        printf("%c\n", buffer);
         *a += buffer<<(8*i);
     }
 }
 
 void read_header(FILE* f, int* N, int* f_ech, int* L, int* number_of_channels){
-    char* useless;
-    char buffer;
+    char useless;
+    unsigned char buffer;
 
     // RIFF
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
 
     // 36+L*n/8 = 36 + 2*n*(number_of_channels)
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
 
     // "WAVEfmt "
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
 
     // 16
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
 
     // 1
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
     
     // number_of_channels
     fscanf(f, "%c", &buffer);
@@ -152,19 +151,19 @@ void read_header(FILE* f, int* N, int* f_ech, int* L, int* number_of_channels){
     fscanf(f, "%c", &buffer);
     *f_ech += buffer << 8;
     fscanf(f, "%c", &buffer);
-    *f_ech = buffer << 16;
+    *f_ech += buffer << 16;
     fscanf(f, "%c", &buffer);
     *f_ech += buffer << 24;
 
-    // f*(number_of_channels)*L/8 = 88200 * (stereoflag + 1)
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);;
+    // f*(number_of_channels)*L/8 = 88200 * (number_of_channels)
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);;
 
     // (number_of_channels)*L/8 = 2 * (number_of_channels)
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
 
     // L = 16
     fscanf(f, "%c", &buffer);
@@ -173,10 +172,10 @@ void read_header(FILE* f, int* N, int* f_ech, int* L, int* number_of_channels){
     *L += buffer << 8;
 
     // "data"
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
-    fscanf(f, "%c", useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
+    fscanf(f, "%c", &useless);
 
     // L*(number_of_channels)*n/8 = 2*n*(number_of_channels)
     int32_t val4;
@@ -191,21 +190,38 @@ void read_header(FILE* f, int* N, int* f_ech, int* L, int* number_of_channels){
 
     *N = val4/2;
 
+    /*
+    printf("%d\n", *number_of_channels);
+    printf("%d\n", *N);
+    */
+
     assert(*L==16);
     assert(*f_ech == 44100);
-    exit(1);
-
 }
 
-sound_t* read_wav(char* filename){
+sound_t** read_wav(char* filename, int* number_of_channels){
     FILE* f = fopen(filename, "r");
     assert(f!=NULL);
 
     int N;
     int f_ech;
     int L;
-    int stereo_flag;
-    read_header(f, &N, &f_ech, &L, &stereo_flag);
+    read_header(f, &N, &f_ech, &L, number_of_channels);
+    
+    sound_t** s_tab = malloc(sizeof(sound_t*));
+    for(int i = 0; i < *number_of_channels; i++){
+        s_tab[i] = malloc(sizeof(sound_t*));
+        s_tab[i]->n_samples = N/(*number_of_channels);
+        s_tab[i]->samples = malloc(s_tab[i]->n_samples * sizeof(int16_t));
+    }
 
+    for(int i = 0; i<N/(*number_of_channels); i++){
+        for(int j = 0; j < *number_of_channels; j++){
+            int16_t buffer = 0;
+            read_int(f, &buffer, 2);
+            (s_tab[j]->samples)[i] = buffer;
+        }
+    }
+    return s_tab;
 
 }
