@@ -1,0 +1,13 @@
+1 // stereo flag, 0 if mono, 1 if stéréo
+2 // number of tracks in left ear
+1 1 // vols
+1 sine
+0 1 1
+1 sawtooth
+0 1 1
+2 // number of tracks in rigth ear
+1 1 // vols
+1 square
+0 0.75 1
+1 sawtooth
+0 0.25 1
