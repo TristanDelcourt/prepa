@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <assert.h>
+#include "midi.h"
+#include "sound.h"
+#include "waveform.h"
+#include "wav.h"
 
 void read_midi_header(FILE* f, int* format, int* number_of_tracks, int* division){
     unsigned char buffer[4];
@@ -43,7 +47,24 @@ void get_delta_time(FILE* f, int32_t* dt){
     }
 }
 
-void read_midi_track(FILE*f){
+void printf_channel_status(channel_status_t* channels){
+    for(int i = 0; i < 16; i++){
+        if(channels[i].note != -1){
+            printf("(%d, %d, %d) ", channels[i].note, channels[i].velocity, channels[i].time_since_last_change);
+        }
+    }
+    printf("\n");
+}
+
+void update_channels_times(channel_status_t* channels, int32_t dt){
+    for(int i = 0; i < 16; i++){
+        if(channels[i].velocity != 0){
+            channels[i].time_since_last_change += dt;
+        }
+    }
+}
+
+mix_t* read_midi_track(FILE*f, int division){
     unsigned char buffer[10];
 
     fscanf(f, "%c%c%c%c", &buffer[0], &buffer[1], &buffer[2], &buffer[3]);
@@ -53,12 +74,37 @@ void read_midi_track(FILE*f){
     int track_length = buffer[0] * 256 * 256 * 256 + buffer[1] * 256 * 256 + buffer[2] * 256 + buffer[3];
     printf("track_length: %d\n", track_length);
 
+    channel_status_t* channels = malloc(16 * sizeof(channel_status_t));
+
+    float time_coef;
+
+    mix_t* m = malloc(sizeof(mix_t));
+    m->n_tracks = 16;
+    m->vols = malloc(16 * sizeof(float));
+    for(int i = 0; i < 16; i++){
+        m->vols[i] = 1;
+    }
+    m->tracks = malloc(16 * sizeof(track_t*));
+    for(int i = 0; i < 16; i++){
+        m->tracks[i] = malloc(sizeof(track_t));
+        m->tracks[i]->n_sounds = 0;
+        m->tracks[i]->sounds = malloc(sizeof(sound_t*));
+    }
+
+
     while(1){  // :(
+
         int32_t dt = 0;
         get_delta_time(f, &dt);
-        printf("(dt: %d) ", dt);
+        //printf("--\n(dt: %d) ", dt);
+
+        update_channels_times(channels, dt);
+
+        //printf_channel_status(channels);
+
 
         fscanf(f, "%c", &buffer[1]);
+        //printf("status: %d\n", buffer[1]);
         // meta event
         if(buffer[1] == 255){
             fscanf(f, "%c", &buffer[2]);
@@ -68,7 +114,7 @@ void read_midi_track(FILE*f){
                 fscanf(f, "%c", &buffer[0]);
                 printf("End of Track\n");
                 printf("----------------------\n");
-                return;
+                return m;
             }
 
             // Sequence Number
@@ -168,12 +214,24 @@ void read_midi_track(FILE*f){
                 printf("MIDI Channel Prefix: %d\n", channel_prefix);
             }
 
+            // MIDI Port
+            else if(buffer[2] == 33){
+                fscanf(f, "%c%c", &buffer[0], &buffer[1]);
+                int8_t  port = buffer[1];
+                printf("MIDI Port: %d\n", port);
+            }
+
             // Tempo
             else if(buffer[2] == 81){
                 fscanf(f, "%c", &buffer[0]); // 03
                 fscanf(f, "%c%c%c", &buffer[0], &buffer[1], &buffer[3]);
                 int32_t tempo = buffer[0] * 256 * 256 + buffer[1] * 256 + buffer[3];
                 printf("Tempo: %d\n", tempo);
+
+                float bpm = (float)60000000/tempo;
+                time_coef = (float)division/(bpm*44100);
+                printf("time_coef: %f\n", time_coef);
+
             }
 
             // SMPTE Offset
@@ -197,13 +255,45 @@ void read_midi_track(FILE*f){
                 printf("Time Signature: %d/%d, %d, %d\n", numerator, denominator, clocks_per_click, number_of_notated_32nd_notes_per_beat);
             }
 
+            else if(buffer[2] == 89){
+                fscanf(f, "%c%c%c", &buffer[0], &buffer[1], &buffer[3]);
+                int8_t sf = buffer[1];
+                int8_t mi = buffer[3];
+                printf("Key Signature: %d, %d\n", sf, mi);
+            }
+
+            else if(buffer[2] == 127){
+                fscanf(f, "%c", &buffer[0]);
+                int32_t length = buffer[0];
+                printf("Sequencer-Specific Meta-event: ");
+                for(int i = 0; i < length; i++){
+                    fscanf(f, "%c", &buffer[3]);
+                    printf("%c", buffer[3]);
+                }
+                printf("\n");
+            }
+
+            else{
+                printf("unknown meta event: %d\n", buffer[2]);
+            }
+            
+
         }
+
         else if((buffer[1]>>4) == 8){
             int channel_nbr = buffer[1] % 16;
             fscanf(f, "%c%c", &buffer[0], &buffer[1]);
             int8_t note = buffer[0];
             int8_t velocity = buffer[1];
             printf("Note Off: %d, %d, %d\n", channel_nbr, note, velocity);
+
+            m->tracks[channel_nbr]->n_sounds++;
+            m->tracks[channel_nbr]->sounds = realloc(m->tracks[channel_nbr]->sounds, m->tracks[channel_nbr]->n_sounds * sizeof(sound_t*));
+            m->tracks[channel_nbr]->sounds[m->tracks[channel_nbr]->n_sounds -1] = sine(channels[channel_nbr].note + 120, channels[channel_nbr].velocity*128, channels[channel_nbr].time_since_last_change * time_coef, 44100);
+
+            channels[channel_nbr].note = note;
+            channels[channel_nbr].velocity = velocity;
+            channels[channel_nbr].time_since_last_change = 0;
         }
 
         else if((buffer[1]>>4) == 9){
@@ -212,6 +302,8 @@ void read_midi_track(FILE*f){
             int8_t note = buffer[0];
             int8_t velocity = buffer[1];
             printf("Note On: %d, %d, %d\n", channel_nbr, note, velocity);
+            channels[channel_nbr].note = note;
+            channels[channel_nbr].velocity = velocity;
         }
 
         else if((buffer[1]>>4) == 10){
@@ -252,20 +344,29 @@ void read_midi_track(FILE*f){
         }
 
         else if((buffer[1]>>4) == 15){
+            if(buffer[1]%16 == 0){
+                printf("Sysex: %d\n", buffer[2]);
+                fscanf(f, "%c", &buffer[0]);
+                while (buffer[0] != 247)
+                {
+                    printf("Sysex: %d\n", buffer[0]);
+                    fscanf(f, "%c", &buffer[0]);
+                }
+            }
 
-            if(buffer[1]%16 == 2){
-                fscanf(f, "%c%c", &buffer[0], &buffer[1]);
-                printf("Song Position Pointer: %d\n", buffer[0] * 256 + buffer[1]);
+
+            else if(buffer[1]%16 == 2){
+                fscanf(f, "%c", &buffer[0]);
+                printf("Song Position Pointer: %d\n", buffer[2] * 256 + buffer[0]);
             }
             else if(buffer[1]%16 == 3){
-                fscanf(f, "%c", &buffer[0]);
-                printf("Song Select: %d\n", buffer[0]);
+                printf("Song Select: %d\n", buffer[2]);
             }
             else if(buffer[1]%16 == 6){
-                printf("Tune Request: %d\n", buffer[0]);
+                printf("Tune Request\n");
             }
             else if(buffer[1]%16 == 7){
-                printf("End of Exclusive: %d\n", buffer[0]);
+                printf("End of Exclusive\n");
             }
             else
             {
@@ -275,6 +376,8 @@ void read_midi_track(FILE*f){
         }
 
     }
+
+    return m;
 }
 
 
@@ -285,10 +388,15 @@ void read_midi_file(char* filename){
     int format, number_of_tracks, division;
     read_midi_header(f, &format, &number_of_tracks, &division);
 
+    mix_t** m = malloc(sizeof(mix_t*));
+    m[0] = malloc(sizeof(mix_t));
     
     for(int i = 0; i < number_of_tracks; i++){
-        read_midi_track(f);
+        m[i] = read_midi_track(f, division);
     }
+
+    sound_t** s = reduce_mix(m, number_of_tracks);
+    save_sound("midi.wav", s, number_of_tracks);
     
 
     fclose(f);

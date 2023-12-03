@@ -8,6 +8,7 @@
 #include "midi.h"
 
 int main(int argc, char** argv){
+
     //assert(argc==3);
     srand(time(NULL));
     
@@ -26,7 +27,7 @@ int main(int argc, char** argv){
 
     //Read midi file
     int format, number_of_tracks, division;
-    read_midi_file("hb.mid");
+    read_midi_file("simple.mid");
 
     return 0;
 }
