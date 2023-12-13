@@ -5,6 +5,8 @@
     "todo-tree.tree.showCountsInTree": true,
     "files.associations": {
         "main.C": "cpp",
-        "test.C": "cpp"
+        "test.C": "cpp",
+        "tp6.C": "cpp",
+        "test_file.C": "cpp"
     }
 }
