@@ -10,6 +10,19 @@ int main(int argc, char** argv){
     assert(argc==3);
     srand(time(NULL));
 
+    clock_t start, end;
+    double cpu_time_used;
+
+    start = clock();
+    
+    mix_t* m = load_mix(argv[1]);
+    sound_t* s = reduce_mix(m);
+    save_sound(argv[2], s);
+
+    end = clock();
+
+    cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+    print_time("Temps d'éxécution: ", cpu_time_used);
 
     //Q8
     /*
@@ -30,7 +43,9 @@ int main(int argc, char** argv){
     fclose(f);
     */
 
-    /*// Q13
+    // Q13
+
+    /*
     sound_t* s1 = sine(440, 0, 0.5, 44100); 
     sound_t* s2 = sine(440, 16000, 0.4, 44100); 
     sound_t* s3 = sine(440, 0, 0.1, 44100); 
@@ -65,8 +80,8 @@ int main(int argc, char** argv){
     sound_t* s2 = square(440, 16000, 5, 44100);
     save_sound("square_test.wav", s2);
 
-    //sound_t* s3 = triangle(440, 32768, 5, 44100);
-    //save_sound("triangle_test.wav", s3);
+    sound_t* s3 = triangle(440, 16000, 5, 44100);
+    save_sound("triangle_test.wav", s3);
 
     sound_t* s4 = sawtooth(440, 16000, 5, 44100);
     save_sound("sawtooth_test.wav", s4);
@@ -95,12 +110,6 @@ int main(int argc, char** argv){
     sound_t* s3 = reduce_mix(m3);
     save_sound("test3.wav", s3);
     */
-
-    
-    mix_t* m = load_mix(argv[1]);
-    sound_t* s = reduce_mix(m);
-    save_sound(argv[2], s);
-
 
     return 0;
 }

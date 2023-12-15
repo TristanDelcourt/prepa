@@ -3,6 +3,26 @@
 #include <stdint.h>
 #include "sound.h"
 
+void print_time(char* msg, double time){
+    int hours, minutes, seconds, milliseconds;
+    double time_in_seconds = time;
+    hours = (int)time_in_seconds / 3600;
+    time_in_seconds -= hours * 3600;
+    minutes = (int)time_in_seconds / 60;
+    time_in_seconds -= minutes * 60;
+    seconds = (int)time_in_seconds;
+    milliseconds = (time_in_seconds - seconds) * 1000;
+
+    if(hours > 0)
+        printf("%s %dh, %dmin, %ds and %dms\n", msg, hours, minutes, seconds, milliseconds);
+    else if(minutes > 0)
+        printf("%s %dmin, %ds and %dms\n", msg, minutes, seconds, milliseconds);
+    else if(seconds > 0)
+        printf("%s %ds and %dms\n", msg, seconds, milliseconds);
+    else
+        printf("%s %dms\n", msg, milliseconds);
+}
+
 void write_int(FILE* f, int a, int size){
     assert(size>=1 && size<=4);
 
@@ -74,7 +94,8 @@ void save_sound(char* filename, sound_t* s){
         write_int(f, (s->samples)[i], 2);
     }
 
-    printf("Fichier '%s' généré.\nTaille du fichier: %f Mo\nDurée de l'audio %d s\n", filename, (float)(s->n_samples)*2/1000000, (s->n_samples)*1/44100);
+    printf("Fichier '%s' généré.\nTaille du fichier: %f Mo\n", filename, (float)(s->n_samples)*2/1000000);
+    print_time("Durée de l'audio:", (s->n_samples)*1/44100);
     free_sound(s);
     fclose(f);
 }
