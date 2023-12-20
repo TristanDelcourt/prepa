@@ -29,13 +29,13 @@ track_t* read_track(FILE* f){
         fscanf(f, "%f %f %f", &pitch, &duree, &volume);
 
         if(!(strcmp("sawtooth", type)))
-            (t->sounds)[i] = sawtooth(pitch_to_freq(pitch), volume*32768, duree, 44100);
+            (t->sounds)[i] = sawtooth(pitch_to_freq(pitch), volume*16000, duree, 44100);
         else if(!(strcmp("sine", type)))
-            (t->sounds)[i] = sine(pitch_to_freq(pitch), volume*32768, duree, 44100);
+            (t->sounds)[i] = sine(pitch_to_freq(pitch), volume*16000, duree, 44100);
         else if(!(strcmp("square", type)))
-            (t->sounds)[i] = square(pitch_to_freq(pitch), volume*32768, duree, 44100);
+            (t->sounds)[i] = square(pitch_to_freq(pitch), volume*16000, duree, 44100);
         else if(!(strcmp("triangle", type)))
-            (t->sounds)[i] = triangle(pitch_to_freq(pitch), volume*32768, duree, 44100);
+            (t->sounds)[i] = triangle(pitch_to_freq(pitch), volume*16000, duree, 44100);
     }
 
     free(type);
