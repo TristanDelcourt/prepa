@@ -29,11 +29,13 @@ track_t* read_track(FILE* f){
         fscanf(f, "%f %f %f", &pitch, &duree, &volume);
 
         if(!(strcmp("sawtooth", type)))
-            (t->sounds)[i] = sawtooth(pitch_to_freq(pitch), volume*32768, duree, 44100);
+            (t->sounds)[i] = sawtooth(pitch_to_freq(pitch), volume*16000, duree, 44100);
         else if(!(strcmp("sine", type)))
-            (t->sounds)[i] = sine(pitch_to_freq(pitch), volume*32768, duree, 44100);
+            (t->sounds)[i] = sine(pitch_to_freq(pitch), volume*16000, duree, 44100);
         else if(!(strcmp("square", type)))
-            (t->sounds)[i] = square(pitch_to_freq(pitch), volume*32768, duree, 44100);
+            (t->sounds)[i] = square(pitch_to_freq(pitch), volume*16000, duree, 44100);
+        else if(!(strcmp("triangle", type)))
+            (t->sounds)[i] = triangle(pitch_to_freq(pitch), volume*32768, duree, 44100);
     }
 
     free(type);
@@ -46,9 +48,9 @@ mix_t** load_mix(char* filename, int* number_of_channels){
 
     fscanf(f, "%d", number_of_channels);
 
-    mix_t** mix_left_right = malloc( (*number_of_channels) * sizeof(mix_t*));
-    for(int j = 0; j< *number_of_channels+1 ; j++)
-        mix_left_right[j] = malloc(sizeof(mix_t));
+    mix_t** mix_tab = malloc( (*number_of_channels) * sizeof(mix_t*));
+    for(int j = 0; j< *number_of_channels ; j++)
+        mix_tab[j] = malloc(sizeof(mix_t));
 
     for(int j = 0; j< *number_of_channels ; j++){
         
@@ -64,11 +66,11 @@ mix_t** load_mix(char* filename, int* number_of_channels){
             t_tab[i] = read_track(f);
         }
 
-        (mix_left_right[j])->n_tracks = nb_tracks;
-        (mix_left_right[j])->tracks = t_tab;
-        (mix_left_right[j])->vols = vol;
+        (mix_tab[j])->n_tracks = nb_tracks;
+        (mix_tab[j])->tracks = t_tab;
+        (mix_tab[j])->vols = vol;
 
     }
     fclose(f);
-    return mix_left_right;
+    return mix_tab;
 }

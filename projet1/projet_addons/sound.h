@@ -31,4 +31,4 @@ void free_mix(mix_t* m);
 sound_t* reduce_track(track_t* t);
 
 // Prends en entrée un mix et le réduit en un seul sound (comme l'implémentation du stéréo a besoin de liste de sound, cette fonction renvoie un liste de taille 1)
-sound_t** reduce_mix(mix_t* m);
+sound_t** reduce_mix(mix_t** m, int number_of_channels);

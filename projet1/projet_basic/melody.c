@@ -34,6 +34,8 @@ track_t* read_track(FILE* f){
             (t->sounds)[i] = sine(pitch_to_freq(pitch), volume*32768, duree, 44100);
         else if(!(strcmp("square", type)))
             (t->sounds)[i] = square(pitch_to_freq(pitch), volume*32768, duree, 44100);
+        else if(!(strcmp("triangle", type)))
+            (t->sounds)[i] = triangle(pitch_to_freq(pitch), volume*32768, duree, 44100);
     }
 
     free(type);

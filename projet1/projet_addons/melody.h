@@ -8,4 +8,4 @@ float pitch_to_freq(int n);
 track_t* read_track(FILE* f);
 
 // Renvoie le mix contenu dans fichier
-mix_t* load_mix(char* filename);
+mix_t** load_mix(char* filename, int* number_of_channels);

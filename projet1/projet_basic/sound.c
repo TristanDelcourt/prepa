@@ -33,7 +33,7 @@ sound_t* reduce_track(track_t* t){
     }
     out->n_samples = total_samples;
 
-    uint16_t* tab = malloc(total_samples * sizeof(uint16_t));
+    int16_t* tab = malloc(total_samples * sizeof(int16_t));
 
     int counter = 0;
     for(int i = 0; i<(t->n_sounds); i++){

@@ -4,6 +4,26 @@
 #include <stdlib.h>
 #include "sound.h"
 
+void print_time(char* msg, double time){
+    int hours, minutes, seconds, milliseconds;
+    double time_in_seconds = time;
+    hours = (int)time_in_seconds / 3600;
+    time_in_seconds -= hours * 3600;
+    minutes = (int)time_in_seconds / 60;
+    time_in_seconds -= minutes * 60;
+    seconds = (int)time_in_seconds;
+    milliseconds = (time_in_seconds - seconds) * 1000;
+
+    if(hours > 0)
+        printf("%s %dh, %dmin, %ds and %dms\n", msg, hours, minutes, seconds, milliseconds);
+    else if(minutes > 0)
+        printf("%s %dmin, %ds and %dms\n", msg, minutes, seconds, milliseconds);
+    else if(seconds > 0)
+        printf("%s %ds and %dms\n", msg, seconds, milliseconds);
+    else
+        printf("%s %dms\n", msg, milliseconds);
+}
+
 void write_int(FILE* f, int a, int size){
     assert(size>=1 && size<=4);
 
@@ -69,16 +89,14 @@ void save_sound(char* filename, sound_t** s, int number_of_channels){
     assert(f!=NULL);
 
 
+    // Nombre de samples total max
     unsigned int number_of_samples = 0;
     for(int j = 0; j < number_of_channels; j++)
-        if(s[j] -> n_samples > number_of_samples){
+        if(s[j] -> n_samples > number_of_samples)
             number_of_samples = s[j] -> n_samples;
-        }
 
 
     write_header(f, number_of_samples, number_of_channels);
-
-    printf("%d\n", number_of_samples);
 
     for(int i = 0; i<number_of_samples; i++){
         for(int j = 0; j < number_of_channels; j++){
@@ -89,9 +107,15 @@ void save_sound(char* filename, sound_t** s, int number_of_channels){
         }
     }
 
-    printf("Fichier '%s' généré.\nTaille du fichier: %f Mo\nDurée de l'audio %d s\n", filename, (float)(number_of_channels)*(number_of_samples)*2/1000000, (number_of_samples)*1/44100);
-    for(int j = 0; j < number_of_channels; j++)
+    int tot_samples = 0;
+    for(int j = 0; j < number_of_channels; j++){
+        tot_samples += s[j] -> n_samples;
         free_sound(s[j]);
+    }
+    free(s);
+    
+    printf("Fichier '%s' généré.\nTaille du fichier: %f Mo\n", filename, (float)(tot_samples)*2/1000000);
+    print_time("Durée de l'audio:", (number_of_samples)*1/44100);
     fclose(f);
 }
 
@@ -201,6 +225,7 @@ void read_header(FILE* f, int* N, int* f_ech, int* L, int* number_of_channels){
 
 sound_t** read_wav(char* filename, int* number_of_channels){
     FILE* f = fopen(filename, "r");
+    printf("%s\n", filename);
     assert(f!=NULL);
 
     int N;
@@ -209,7 +234,7 @@ sound_t** read_wav(char* filename, int* number_of_channels){
     read_header(f, &N, &f_ech, &L, number_of_channels);
     
     sound_t** s_tab = malloc(sizeof(sound_t*));
-    for(int i = 0; i < *number_of_channels; i++){
+    for(int i = 0; i < (*number_of_channels); i++){
         s_tab[i] = malloc(sizeof(sound_t*));
         s_tab[i]->n_samples = N/(*number_of_channels);
         s_tab[i]->samples = malloc(s_tab[i]->n_samples * sizeof(int16_t));

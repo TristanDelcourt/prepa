@@ -33,7 +33,7 @@ sound_t* reduce_track(track_t* t){
     }
     out->n_samples = total_samples;
 
-    uint16_t* tab = malloc(total_samples * sizeof(uint16_t));
+    int16_t* tab = malloc(total_samples * sizeof(int16_t));
 
     int counter = 0;
     for(int i = 0; i<(t->n_sounds); i++){
@@ -48,12 +48,13 @@ sound_t* reduce_track(track_t* t){
 }
 
 sound_t** reduce_mix(mix_t** m, int number_of_channels){
+
+    // On initialize la liste de sounds
     sound_t** out = malloc((number_of_channels) * sizeof(sound_t*));
     for(int i = 0; i < number_of_channels ; i++)
         out[i] = malloc(sizeof(sound_t));
 
     for(int stereo = 0; stereo < number_of_channels ; stereo++){
-        
 
         int len_tab = m[stereo]->n_tracks;
         sound_t** s_tab = malloc(len_tab * sizeof(sound_t*));
@@ -92,6 +93,7 @@ sound_t** reduce_mix(mix_t** m, int number_of_channels){
         free(ponderation);
 
     }
+    free(m);
 
     return out;
 }

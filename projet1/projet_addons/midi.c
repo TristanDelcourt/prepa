@@ -380,6 +380,105 @@ mix_t* read_midi_track(FILE*f, int division){
     return m;
 }
 
+uint32_t get_total_dt_tempo(FILE* f, uint32_t* tempo){
+    unsigned char buffer[10];
+
+    fscanf(f, "%c%c%c%c", &buffer[0], &buffer[1], &buffer[2], &buffer[3]);
+    assert(buffer[0] == 'M' && buffer[1] == 'T' && buffer[2] == 'r' && buffer[3] == 'k');
+
+    fscanf(f, "%c%c%c%c", &buffer[0], &buffer[1], &buffer[2], &buffer[3]);
+    int track_length = buffer[0] * 256 * 256 * 256 + buffer[1] * 256 * 256 + buffer[2] * 256 + buffer[3];
+    printf("track_length: %d\n", track_length);
+
+    int i = 0;
+    int32_t total_dt = 0;
+    while(i < track_length){
+
+        int32_t dt = 0;
+        get_delta_time(f, &dt);
+        total_dt += dt;
+
+        fscanf(f, "%c", &buffer[0]);
+        if(buffer[0] = 255){
+            fscanf(f, "%c", &buffer[2]);
+
+            if(buffer[2] == 47 || buffer[2] == 0){
+                fscanf(f, "%c", &buffer[0]);
+                i += 1;
+            }
+
+            else if(buffer[2] == 32 || buffer[2] == 33){
+                fscanf(f, "%c%c", &buffer[0], &buffer[1]);
+                i += 2;
+            }
+
+            else if(buffer[2] == 89){
+                fscanf(f, "%c%c%c", &buffer[0], &buffer[1], &buffer[3]);
+                i += 3;
+            }
+
+            else if(buffer[2] == 84 || buffer[2] == 88){
+                fscanf(f, "%c%c%c%c%c", &buffer[0], &buffer[1], &buffer[3], &buffer[4], &buffer[5]);
+                i += 5;
+            }
+
+            else if(buffer[2] == 1 || buffer[2] == 2 || buffer[2] == 3 || buffer[2] == 4 || buffer[2] == 5 || buffer[2] == 6 || buffer[2] == 7 || buffer[2] == 127){
+                fscanf(f, "%c", &buffer[0]);
+                int32_t length = buffer[0];
+                for(int i = 0; i < length; i++){
+                    fscanf(f, "%c", &buffer[3]);
+                    i += 1;
+                }
+                i += 1;
+            }
+
+
+            // Tempo
+            else if(buffer[2] == 81){
+                fscanf(f, "%c", &buffer[0]); // 03
+                fscanf(f, "%c%c%c", &buffer[0], &buffer[1], &buffer[3]);
+                *tempo = buffer[0] * 256 * 256 + buffer[1] * 256 + buffer[3];
+                printf("Tempo: %u\n", *tempo);
+                i += 4;
+
+            }
+
+            else{
+                printf("unknown meta event: %d\n", buffer[2]);
+            }
+
+        }
+
+        else if((buffer[1]>>4) == 9 || (buffer[1]>>4) == 8 || (buffer[1]>>4) == 10 || (buffer[1]>>4) == 11 || (buffer[1]>>4) == 14) {
+            fscanf(f, "%c%c", &buffer[0], &buffer[1]);
+            i += 2;
+        }
+
+        else if((buffer[1]>>4) == 12 || (buffer[1]>>4) == 13){
+            fscanf(f, "%c", &buffer[0]);
+            i += 1;
+        }
+
+        else if((buffer[1]>>4) == 15){
+            if(buffer[1]%16 == 0){
+                fscanf(f, "%c", &buffer[0]);
+                while (buffer[0] != 247)
+                    i += 1;
+                i += 1;
+            }
+
+
+            else if(buffer[1]%16 == 2 || buffer[1]%16 == 3 || buffer[1]%16 == 6 || buffer[1]%16 == 7){
+                fscanf(f, "%c", &buffer[0]);
+                i += 1;
+            }
+            else
+                printf("unknown event: %d\n", buffer[1]);
+        }
+    }
+
+    return total_dt;
+}
 
 void read_midi_file(char* filename){
     FILE* f = fopen(filename, "r");
@@ -388,16 +487,13 @@ void read_midi_file(char* filename){
     int format, number_of_tracks, division;
     read_midi_header(f, &format, &number_of_tracks, &division);
 
-    mix_t** m = malloc(sizeof(mix_t*));
-    m[0] = malloc(sizeof(mix_t));
-    
-    for(int i = 0; i < number_of_tracks; i++){
-        m[i] = read_midi_track(f, division);
-    }
+    uint32_t tempo = 0;
+    uint32_t total_dt = get_total_dt_tempo(f, &tempo);
+    float tick_duration = (float)tempo/division;
+    uint32_t duration = total_dt * tick_duration;
+    uint64_t n_samples = duration * 44100;
 
-    sound_t** s = reduce_mix(m, number_of_tracks);
-    save_sound("midi.wav", s, number_of_tracks);
-    
+    printf("samples: %ld\n", n_samples);
 
     fclose(f);
 }
