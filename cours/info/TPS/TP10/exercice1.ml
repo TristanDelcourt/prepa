@@ -1,0 +1,10 @@
+let double x = 2 * x;;
+let first (a, b) = a;;
+let second (a, b) = b;;
+let ajouter (a, b, c) = a +. b +. c;;
+let est_pair x = (x mod 2) = 0;;
+let divise a b = (b mod a) = 0;;
+let ajouteur k = fun x -> x + k;;
+let est_racine f x = (f x) = 0;;
+let id x = x;;
+let composee f g = fun x -> f g x;;
