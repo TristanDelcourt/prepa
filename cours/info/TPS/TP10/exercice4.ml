@@ -22,3 +22,35 @@ let rec a_racine f a b =
     if a = b then false else
     a_racine f (a+1) b
 ;;
+
+let rec concat l1 l2 = match l1 with
+    | [] -> l2
+    | x::q -> x::concat q l2
+
+type fourniture =
+    | Stylo of string
+    | Regle of int*bool
+    | Gomme
+
+type trousse = fourniture list
+
+let prix (x: fourniture) = 
+    match x with
+    | Gomme -> 1.5
+    | Stylo "bleu" -> 1.2
+    | Stylo _ -> 1.0
+    | Regle (l, _) -> 1. +. float_of_int l /. 15.
+
+let rec prix_trousse (tr: trousse): float =
+    match tr with
+    | [] -> 5.
+    | f ::q -> prix(f) +. prix_trousse q
+
+type 'a liste = 
+    | Vide
+    | Cons of 'a * 'a liste
+
+let rec longueur (l: 'a liste) : int = 
+    match l with
+    | Vide -> 0
+    | Cons (_, q) -> 1 + longueur q

@@ -9,5 +9,6 @@
         "tp6.C": "cpp",
         "test_file.C": "cpp",
         "stdlib.h": "c"
-    }
+    },
+    "python.analysis.typeCheckingMode": "basic"
 }
