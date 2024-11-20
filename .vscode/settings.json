@@ -1,6 +1,7 @@
 {
     "ocaml.sandbox": {
-        "kind": "global"
+        "kind": "opam",
+        "switch": "default"
     },
     "todo-tree.tree.showCountsInTree": true,
     "files.associations": {
