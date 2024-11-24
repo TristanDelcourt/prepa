@@ -96,3 +96,21 @@ let somme_cumule a =
   done;
 
   out
+
+let truc t =
+
+  for i = 0 to Array.length t - 1 do
+    t.(i) <- i::t.(i)
+  done
+
+let truc2 t x = 
+  Array.map (fun l -> match l with | y::q -> (x+y)::q | _ -> raise (Invalid_argument"liste vide")) t
+
+
+let max_m t m = 
+  let occ = Array.make m 0 in
+  let xmax = ref 0 in
+  Array.iter (fun x -> 
+    occ.(x) <- occ.(x) + 1;
+    if occ.(x) > occ.(!xmax) then xmax := x) t;
+  !xmax
